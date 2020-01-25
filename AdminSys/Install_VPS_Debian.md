@@ -1,12 +1,30 @@
 # **Installation de base du serveur :**
 
-## **APACHE :**
+## **Création d'un espace de swap :**
+
+> _Pour vérifier si il existe un espace de swap :_
+
+`sudo swapon --show`
+
+> _Création d'une partition swap de 2G :_
+
+`sudo fallocate -l 2G /swapfile`
+
+`sudo chmod 600 /swapfile`
+
+`sudo mkswap /swapfile`
+
+`sudo swapon /swapfile`
+
+## **Installation LAMP Stack :**
 
 ### **Installation Apache Web Server  :**
 
 `sudo apt-get install apache2 apache2-doc`
 
 #### Ajout de la gestion HTTPS :
+
+https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 
 `sudo apt install ca-certificates apt-transport-https`
 
@@ -73,22 +91,6 @@
 
 `sudo echo "deb https://packages.sury.org/php/ buster main" | sudo tee /etc/apt/sources.list.d/php.list`
 
-
-### **Création d'un espace de swap :**
-
-> _Pour vérifier si il existe un espace de swap :_
-
-`sudo swapon --show`
-
-> _Création d'une partition swap de 2G :_
-
-`sudo fallocate -l 2G /swapfile`
-
-`sudo chmod 600 /swapfile`
-
-`sudo mkswap /swapfile`
-
-`sudo swapon /swapfile`
 
 ### **Installation de Node.js :**
 
