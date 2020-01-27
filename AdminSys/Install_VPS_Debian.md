@@ -2,11 +2,11 @@
 
 ## **Création d'un espace de swap :**
 
-> _Pour vérifier si il existe un espace de swap :_
+> **Pour vérifier si il existe un espace de swap :**
 
 `sudo swapon --show`
 
-> _Création d'une partition swap de 2G :_
+> **Création d'une partition swap de 2G :**
 
 `sudo fallocate -l 2G /swapfile`
 
@@ -45,11 +45,11 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
    also contain certificates and private keys obtained by Certbot so
    making regular backups of this folder is ideal.
 ```
-> _Pour renouveller tous les certificats :_
+> **Pour renouveller tous les certificats :**
 
 `certbot renew`
 
-### **Modification des droits sur dossier /var/www/ :**
+#### Modification des droits sur dossier /var/www/ :
 
 `sudo chown -R $USER:www-data /var/www`
 
@@ -57,56 +57,137 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 
 #### Dossier de création des VirtualHosts :
 
-> _Par defaut le site existant est :_
+> **Par defaut le site existant est :**
 
 `sudo nano /etc/apache2/sites-available/000-default.conf`
 
-> _On peut créer des nouveaux fichiers pour chacun de nos sites hébergés :_
+> **On peut créer des nouveaux fichiers pour chacun de nos sites hébergés :**
 
 `sudo nano /etc/apache2/sites-available/site-exemple.conf`
 
-> _Exemple de contenu du fichier_ :
+> **Exemple de contenu du fichier 000-default.conf (pour frontend React + backend Api Symfo sur le même serveur)** :
 
 ```
+# FRONTEND oZone
 <VirtualHost *:80>
-
-        # The ServerName directive sets the request scheme, hostname and port that
-        # the server uses to identify itself. This is used when creating
-        # redirection URLs. In the context of virtual hosts, the ServerName
-        # specifies what hostname must appear in the request's Host: header to
-        # match this virtual host. For the default virtual host (this file) this
-        # value is not decisive as it is used as a last resort host regardless.
-        # However, you must set it for any further virtual host explicitly.
-        #ServerName www.example.com
-
+        ServerName www.geekoz.fr
         ServerAdmin webmaster@localhost
-        DocumentRoot /var/www/html
+        DocumentRoot "/var/www/html/ozone/frontend/dist"
 
-        <Directory /var/www/html>
-                Options Indexes FollowSymLinks MultiViews
+        <Directory /var/www/html/ozone/frontend/dist>
+                Options +Indexes +Includes +FollowSymLinks +MultiViews
                 AllowOverride All
+                <IfModule mod_rewrite.c>
+                        RewriteEngine On
+                        # If an existing asset or directory is requested go to it as it is
+                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+                        RewriteRule ^ - [L]
+                        # If the requested resource doesn't exist, use index.html
+                        RewriteRule ^ /index.html
+                </IfModule>
                 Require all granted
         </Directory>
 
-        # Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
-        # error, crit, alert, emerg.
-        # It is also possible to configure the loglevel for particular
-        # modules, e.g.
-        #LogLevel info ssl:warn
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+RewriteCond %{SERVER_NAME} =www.geekoz.fr
+RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+# BACKEND oZone
+<VirtualHost *:80>
+        ServerName api.geekoz.fr
+        ServerAdmin webmaster@localhost
+        DocumentRoot "/var/www/html/ozone/backend/public"
+        DirectoryIndex /index.php
+
+        <IfModule mod_headers.c>
+                Header set Access-Control-Allow-Origin "*"
+        </IfModule>
+
+        <Directory /var/www/html/ozone/backend/public>
+                AllowOverride None
+                Require all granted
+                Allow from All
+                FallbackResource /index.php
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+RewriteEngine on
+# Authorization  header
+# Règles spécifiques pour le bon fonctionnement du JWT
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+</VirtualHost>
+```
+> **Pour la version 000-default-le-ssl.conf (connexion en HTTPS)** :
+
+```
+# FRONTEND oZone
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+        ServerName www.geekoz.fr
+        ServerAdmin webmaster@localhost
+        DocumentRoot "/var/www/html/ozone/frontend/dist"
+
+        <Directory /var/www/html/ozone/frontend/dist>
+                Options +Indexes +Includes +FollowSymLinks +MultiViews
+                AllowOverride All
+                <IfModule mod_rewrite.c>
+                        RewriteEngine On
+                        # If an existing asset or directory is requested go to it as it is
+                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+                        RewriteRule ^ - [L]
+                        # If the requested resource doesn't exist, use index.html
+                        RewriteRule ^ /index.html
+                </IfModule>
+                Require all granted
+        </Directory>
 
         ErrorLog ${APACHE_LOG_DIR}/error.log
         CustomLog ${APACHE_LOG_DIR}/access.log combined
 
-        # For most configuration files from conf-available/, which are
-        # enabled or disabled at a global level, it is possible to
-        # include a line for only one particular virtual host. For example the
-        # following line enables the CGI configuration for this host only
-        # after it has been globally disabled with "a2disconf".
-        #Include conf-available/serve-cgi-bin.conf
-
+Include /etc/letsencrypt/options-ssl-apache.conf
+SSLCertificateFile /etc/letsencrypt/live/www.geekoz.fr/fullchain.pem
+SSLCertificateKeyFile /etc/letsencrypt/live/www.geekoz.fr/privkey.pem
 </VirtualHost>
+</IfModule>
+
+# BACKEND oZone
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+        ServerName api.geekoz.fr
+        ServerAdmin webmaster@localhost
+        DocumentRoot "/var/www/html/ozone/backend/public"
+        DirectoryIndex /index.php
+
+        <IfModule mod_headers.c>
+                Header set Access-Control-Allow-Origin "*"
+        </IfModule>
+        RewriteEngine On
+        RewriteCond %{REQUEST_METHOD} ^OPTIONS
+        RewriteRule .* - [F]
+        <Directory /var/www/html/ozone/backend/public>
+                AllowOverride None
+                Require all granted
+                Allow from All
+                FallbackResource /index.php
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+SSLCertificateFile /etc/letsencrypt/live/api.geekoz.fr/fullchain.pem
+SSLCertificateKeyFile /etc/letsencrypt/live/api.geekoz.fr/privkey.pem
+Include /etc/letsencrypt/options-ssl-apache.conf
+</VirtualHost>
+</IfModule>
 ```
-### **Ajout du repo Sury pour Debian 10 (contient notament les dernières versions de PHP et Modules) :**
+### **Ajout du repo Sury pour Debian 10 :** 
+> _Contient notament les dernières versions de PHP et ses Modules_
 
 `wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -`
 
