@@ -18,7 +18,7 @@
 
 ## **Installation LAMP Stack :**
 
-### **Installation Apache Web Server  :**
+### **Installation Apache Web Server :**
 
 `sudo apt-get install apache2 apache2-doc`
 
@@ -45,15 +45,16 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
    also contain certificates and private keys obtained by Certbot so
    making regular backups of this folder is ideal.
 ```
+
 > **Pour renouveller tous les certificats :**
 
 `certbot renew`
 
 #### Modification des droits sur dossier /var/www/ :
 
-`sudo chown -R $USER:www-data /var/www`
+`sudo chown -R $USER:www-data /var/www/ozone`
 
-`sudo chmod -R g+rw /var/www`
+`sudo chmod -R g+rw /var/www/ozone`
 
 #### Dossier de création des VirtualHosts :
 
@@ -70,13 +71,13 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 ```
 # FRONTEND oZone
 <VirtualHost *:80>
-        ServerName www.geekoz.fr
-        ServerAdmin webmaster@localhost
-        DocumentRoot "/var/www/html/ozone/frontend/dist"
+ServerName www.geekoz.fr
+ServerAdmin webmaster@localhost
+DocumentRoot "/var/www/html/ozone/frontend/dist"
 
-        <Directory /var/www/html/ozone/frontend/dist>
-                Options +Indexes +Includes +FollowSymLinks +MultiViews
-                AllowOverride All
+<Directory /var/www/html/ozone/frontend/dist>
+        Options +Indexes +Includes +FollowSymLinks +MultiViews
+        AllowOverride All
                 <IfModule mod_rewrite.c>
                         RewriteEngine On
                         # If an existing asset or directory is requested go to it as it is
@@ -86,35 +87,35 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
                         # If the requested resource doesn't exist, use index.html
                         RewriteRule ^ /index.html
                 </IfModule>
-                Require all granted
-        </Directory>
+        Require all granted
+</Directory>
 
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access.log combined
 RewriteCond %{SERVER_NAME} =www.geekoz.fr
 RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 </VirtualHost>
 
 # BACKEND oZone
 <VirtualHost *:80>
-        ServerName api.geekoz.fr
-        ServerAdmin webmaster@localhost
-        DocumentRoot "/var/www/html/ozone/backend/public"
-        DirectoryIndex /index.php
+ServerName api.geekoz.fr
+ServerAdmin webmaster@localhost
+DocumentRoot "/var/www/html/ozone/backend/public"
+DirectoryIndex /index.php
 
-        <IfModule mod_headers.c>
-                Header set Access-Control-Allow-Origin "*"
-        </IfModule>
+<IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+</IfModule>
 
-        <Directory /var/www/html/ozone/backend/public>
-                AllowOverride None
-                Require all granted
-                Allow from All
-                FallbackResource /index.php
-        </Directory>
+<Directory /var/www/html/ozone/backend/public>
+        AllowOverride None
+        Require all granted
+        Allow from All
+        FallbackResource /index.php
+</Directory>
 
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access.log combined
 RewriteEngine on
 # Authorization  header
 # Règles spécifiques pour le bon fonctionnement du JWT
@@ -122,33 +123,34 @@ RewriteCond %{HTTP:Authorization} ^(.*)
 RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 </VirtualHost>
 ```
+
 > **Pour la version 000-default-le-ssl.conf (connexion en HTTPS)** :
 
 ```
 # FRONTEND oZone
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
-        ServerName www.geekoz.fr
-        ServerAdmin webmaster@localhost
-        DocumentRoot "/var/www/html/ozone/frontend/dist"
+ServerName www.geekoz.fr
+ServerAdmin webmaster@localhost
+DocumentRoot "/var/www/html/ozone/frontend/dist"
 
-        <Directory /var/www/html/ozone/frontend/dist>
-                Options +Indexes +Includes +FollowSymLinks +MultiViews
-                AllowOverride All
-                <IfModule mod_rewrite.c>
-                        RewriteEngine On
-                        # If an existing asset or directory is requested go to it as it is
-                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
-                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
-                        RewriteRule ^ - [L]
-                        # If the requested resource doesn't exist, use index.html
-                        RewriteRule ^ /index.html
-                </IfModule>
-                Require all granted
-        </Directory>
+<Directory /var/www/html/ozone/frontend/dist>
+        Options +Indexes +Includes +FollowSymLinks +MultiViews
+        AllowOverride All
+        <IfModule mod_rewrite.c>
+                RewriteEngine On
+                # If an existing asset or directory is requested go to it as it is
+                RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+                RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+                RewriteRule ^ - [L]
+                # If the requested resource doesn't exist, use index.html
+                RewriteRule ^ /index.html
+        </IfModule>
+        Require all granted
+</Directory>
 
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access.log combined
 
 Include /etc/letsencrypt/options-ssl-apache.conf
 SSLCertificateFile /etc/letsencrypt/live/www.geekoz.fr/fullchain.pem
@@ -159,41 +161,71 @@ SSLCertificateKeyFile /etc/letsencrypt/live/www.geekoz.fr/privkey.pem
 # BACKEND oZone
 <IfModule mod_ssl.c>
 <VirtualHost *:443>
-        ServerName api.geekoz.fr
-        ServerAdmin webmaster@localhost
-        DocumentRoot "/var/www/html/ozone/backend/public"
-        DirectoryIndex /index.php
+ServerName api.geekoz.fr
+ServerAdmin webmaster@localhost
+DocumentRoot "/var/www/html/ozone/backend/public"
+DirectoryIndex /index.php
 
-        <IfModule mod_headers.c>
-                Header set Access-Control-Allow-Origin "*"
-        </IfModule>
-        RewriteEngine On
-        RewriteCond %{REQUEST_METHOD} ^OPTIONS
-        RewriteRule .* - [F]
-        <Directory /var/www/html/ozone/backend/public>
-                AllowOverride None
-                Require all granted
-                Allow from All
-                FallbackResource /index.php
-        </Directory>
+<IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+</IfModule>
 
-        ErrorLog ${APACHE_LOG_DIR}/error.log
-        CustomLog ${APACHE_LOG_DIR}/access.log combined
+RewriteEngine On
+RewriteCond %{REQUEST_METHOD} ^OPTIONS
+RewriteRule .* - [F]
+<Directory /var/www/html/ozone/backend/public>
+        AllowOverride None
+        Require all granted
+        Allow from All
+        FallbackResource /index.php
+</Directory>
 
+ErrorLog ${APACHE_LOG_DIR}/error.log
+CustomLog ${APACHE_LOG_DIR}/access.log combined
+RewriteEngine on
+# Règles spécifiques pour le bon fonctionnement du JWT
+# Authorization  header
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
 SSLCertificateFile /etc/letsencrypt/live/api.geekoz.fr/fullchain.pem
 SSLCertificateKeyFile /etc/letsencrypt/live/api.geekoz.fr/privkey.pem
 Include /etc/letsencrypt/options-ssl-apache.conf
 </VirtualHost>
 </IfModule>
 ```
-### **Ajout du repo Sury pour Debian 10 :** 
+
+### **Ajout du repo Sury pour Debian 10 :**
+
 > _Contient notament les dernières versions de PHP et ses Modules_
 
 `wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -`
 
 `sudo echo "deb https://packages.sury.org/php/ buster main" | sudo tee /etc/apt/sources.list.d/php.list`
 
-
 ### **Installation de Node.js :**
 
 https://github.com/nodesource/distributions
+
+### **Installation de LexikJWTBundle :**
+
+https://github.com/lexik/LexikJWTAuthenticationBundle
+
+> **Règles à ajouter dans la config d'apache (VirtualHost ou .htaccess)** :
+
+```
+# Règles spécifiques pour le bon fonctionnement du JWT
+# Authorization  header
+RewriteEngine on
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+```
+
+> **Génération des clefs private et public sur le serveur** :
+
+_Saisir la JWT passphrase renseignée dans le fichier .env lorsqu'il la demande_
+
+`mkdir -p config/jwt`
+
+`openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096`
+
+`openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout`
