@@ -1,7 +1,7 @@
 # **Installation de base du serveur :**
 
-## **Mise en place de la sécurisation de la connection SSH :**
-_(Dans cet exemple le serveur sera 'ozone.best')_
+## **Mise en place de la sécurisation de la connexion SSH :**
+_(Dans cet exemple le serveur sera `ozone.best`)_
 
 > **Première connexion pour créer une entrée dans le known_hosts :**
 >
@@ -14,7 +14,7 @@ _(Dans cet exemple le serveur sera 'ozone.best')_
 >`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best`
 
 ## **Création d'un nouvel utilisateur sudo :**
-_(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
+_Dans cet exemple l'utilisateur sera `dbl-lnx`_
 
 > **Création de l'utilisateur :**
 >
@@ -24,7 +24,7 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >
 >`usermod -aG sudo dbl-lnx`
 
-> **Connection sur ce nouvel utilisateur :**
+> **Connexi immédiate on sur ce nouvel utilisateur :**
 >
 >`su - dbl-lnx`
 
@@ -71,44 +71,47 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >
 >`sudo apt-get install apache2 apache2-doc`
 
-#### Modification des droits sur dossier /var/www/ :
+#### **Modification des droits sur le dossier `/var/www/html/ozone.best`, qui contient notre site (Front & Back) :**
 
 >`sudo chown -R $USER:www-data /var/www/html/ozone.best`
 >
 >`sudo chmod -R g+rw /var/www/html/ozone.best`
 
-#### Dossier de création des VirtualHosts :
+#### **Dossier de création des VirtualHosts pour chacun de nos nouveaux sites :**
 
-> **Par defaut le site existant est :**
+> **Par defaut Apache pointe sur /var/www/html (pour des raisons de sécurité, le désactiver):**
 >
->`sudo nano /etc/apache2/sites-available/000-default.conf`
-
-> **On peut créer des nouveaux fichiers pour chacun de nos sites hébergés :**
+>`sudo a2dissite 000-default.conf`
 >
->`sudo nano /etc/apache2/sites-available/site-exemple.conf`
+>_Les fichiers de conf des sites se trouvent dans  `/etc/apache2/sites-available/`_
 
-> **Exemple de contenu du fichier 000-default.conf (pour frontend React + backend Api Symfo sur le même serveur)** :
+> **On va maintenant créer un nouveau fichier pour `ozone.best` :**
+>
+>`sudo nano /etc/apache2/sites-available/ozone.best.conf`
+
+> **Contenu du fichier pour Frontend React + Backend Api Symfo sur le même serveur :**
 >
 >```
-># FRONTEND oZone
+># FRONTEND 
 ><VirtualHost *:80>
 >ServerName ozone.best
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone/frontend/dist"
+>DocumentRoot "/var/www/html/ozone.best/frontend/dist"
+>Redirect permanent / https://ozone.best/
 >
-><Directory /var/www/html/ozone/frontend/dist>
->        Options +Indexes +Includes +FollowSymLinks +MultiViews
->        AllowOverride All
->                <IfModule mod_rewrite.c>
->                        RewriteEngine On
->                        # If an existing asset or directory is requested go to it as it is
->                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
->                        RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
->                        RewriteRule ^ - [L]
->                        # If the requested resource doesn't exist, use index.html
->                        RewriteRule ^ /index.html
->                </IfModule>
->        Require all granted
+><Directory /var/www/html/ozone.best/frontend/dist>
+>       Options +Indexes +Includes +FollowSymLinks +MultiViews
+>       AllowOverride All
+>               <IfModule mod_rewrite.c>
+>                       RewriteEngine On
+>                       # If an existing asset or directory is requested go to it as it is
+>                       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+>                       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+>                       RewriteRule ^ - [L]
+>                       # If the requested resource doesn't exist, use index.html
+>                       RewriteRule ^ /index.html
+>               </IfModule>
+>       Require all granted
 ></Directory>
 >
 >ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -117,22 +120,22 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ></VirtualHost>
 >
-># BACKEND oZone
+># BACKEND 
 ><VirtualHost *:80>
 >ServerName api.ozone.best
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone/backend/public"
+>DocumentRoot "/var/www/html/ozone.best/backend/public"
+>Redirect permanent / https://api.ozone.best/
 >DirectoryIndex /index.php
 >
 ><IfModule mod_headers.c>
 >        Header set Access-Control-Allow-Origin "*"
 ></IfModule>
 >
-><Directory /var/www/html/ozone/backend/public>
->        AllowOverride None
->        Require all granted
->        Allow from All
->        FallbackResource /index.php
+><Directory /var/www/html/ozone.best/backend/public>
+>       AllowOverride None
+>       Require all granted
+>       FallbackResource /index.php
 ></Directory>
 >
 >ErrorLog ${APACHE_LOG_DIR}/error.log
@@ -142,88 +145,22 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 ># Règles spécifiques pour le bon fonctionnement du JWT
 >RewriteCond %{HTTP:Authorization} ^(.*)
 >RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+>RewriteCond %{SERVER_NAME} =api.ozone.best
+>RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ></VirtualHost>
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 
-> **Pour la version 000-default-le-ssl.conf (connexion en HTTPS)** :
->
->```
-># FRONTEND oZone
-><IfModule mod_ssl.c>
-><VirtualHost *:443>
->ServerName ozone.best
->ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone/frontend/dist"
->
-><Directory /var/www/html/ozone/frontend/dist>
->        Options +Indexes +Includes +FollowSymLinks +MultiViews
->        AllowOverride All
->        <IfModule mod_rewrite.c>
->                RewriteEngine On
->                # If an existing asset or directory is requested go to it as it is
->                RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
->                RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
->                RewriteRule ^ - [L]
->                # If the requested resource doesn't exist, use index.html
->                RewriteRule ^ /index.html
->        </IfModule>
->        Require all granted
-></Directory>
->
->ErrorLog ${APACHE_LOG_DIR}/error.log
->CustomLog ${APACHE_LOG_DIR}/access.log combined
->
->Include /etc/letsencrypt/options-ssl-apache.conf
->SSLCertificateFile /etc/letsencrypt/live/ozone.best/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best/privkey.pem
-></VirtualHost>
-></IfModule>
->
-># BACKEND oZone
-><IfModule mod_ssl.c>
-><VirtualHost *:443>
->ServerName api.ozone.best
->ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone/backend/public"
->DirectoryIndex /index.php
->
-><IfModule mod_headers.c>
->        Header set Access-Control-Allow-Origin "*"
-></IfModule>
->
->RewriteEngine On
->RewriteCond %{REQUEST_METHOD} ^OPTIONS
->RewriteRule .* - [F]
-><Directory /var/www/html/ozone/backend/public>
->        AllowOverride None
->        Require all granted
->        Allow from All
->        FallbackResource /index.php
-></Directory>
->
->ErrorLog ${APACHE_LOG_DIR}/error.log
->CustomLog ${APACHE_LOG_DIR}/access.log combined
->RewriteEngine on
-># Règles spécifiques pour le bon fonctionnement du JWT
-># Authorization  header
->RewriteCond %{HTTP:Authorization} ^(.*)
->RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
->SSLCertificateFile /etc/letsencrypt/live/api.ozone.best/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/api.ozone.best/privkey.pem
->Include /etc/letsencrypt/options-ssl-apache.conf
-></VirtualHost>
-></IfModule>
->```
->_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
-
-### **Installation des certificats HTTPS pour Apache :**
-
-https://linuxhint.com/setup_free_ssl_cert_apache_debian/
+### **Installation des certificats HTTPS (SSL/TLS) avec certbot pour Apache :**
+[Lien vers la documentation complète](https://linuxhint.com/setup_free_ssl_cert_apache_debian/)
 >
 >`sudo apt install certbot python-certbot-apache ca-certificates apt-transport-https -y`
 >
 >`sudo certbot --apache`
+>
+> - Choisir les sites pour lesquels on veut obtenir un certificat (laisser vide si on veut sécuriser tous les sites)
+> - Ensuite choisir le choix `2` de préférence pour donner l'ordre de forcer la redirection sur HTTPS
+> - Une fois fait, normalement un message semblable devrait s'afficher si tout s'est bien passé :
 >
 >```
 > - Congratulations! Your certificate and chain have been saved at:
@@ -245,7 +182,7 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >
 >`certbot renew`
 
-> **Forcer la redirection sur HTTPS via VirtualHosts :**
+> **Forcer la redirection sur HTTPS via VirtualHosts (Ajout de la ligne 'Redirect permanent'):**
 >
 >```
 ># FRONTEND oZone
@@ -263,12 +200,95 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >Redirect permanent / https://api.ozone.best/
 >```
 
+> **Lors de la génération des certificats HTTPS (SSL/TLS), une réplique du fichier .conf est créée :**
+>
+>`sudo nano /etc/apache2/sites-available/ozone.best-le-ssl.conf`
+
+> **Contenu du fichier pour Frontend React + Backend Api Symfo sur le même serveur :**
+>
+>```
+><IfModule mod_ssl.c>
+>Protocols h2 h2c http/1.1
+># FRONTEND
+><VirtualHost *:443>
+>ServerName ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
+>DocumentRoot "/var/www/html/ozone.best/frontend/dist"
+>
+><Directory /var/www/html/ozone.best/frontend/dist>
+>       Options +Indexes +Includes +FollowSymLinks +MultiViews
+>       AllowOverride All
+>               <IfModule mod_rewrite.c>
+>                       RewriteEngine On
+>                       # If an existing asset or directory is requested go to it as it is
+>                       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+>                       RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+>                       RewriteRule ^ - [L]
+>                       # If the requested resource doesn't exist, use index.html
+>                       RewriteRule ^ /index.html
+>               </IfModule>
+>       Require all granted
+></Directory>
+>
+>ErrorLog ${APACHE_LOG_DIR}/error.log
+>CustomLog ${APACHE_LOG_DIR}/access.log combined
+># Some rewrite rules in this file were disabled on your HTTPS site,
+># because they have the potential to create redirection loops.
+>
+># RewriteCond %{SERVER_NAME} =ozone.best
+># RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+>
+>
+>SSLCertificateFile /etc/letsencrypt/live/ozone.best-0001/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best-0001/privkey.pem
+>Include /etc/letsencrypt/options-ssl-apache.conf
+></VirtualHost>
+></IfModule>
+>
+># BACKEND
+><IfModule mod_ssl.c>
+><VirtualHost *:443>
+>ServerName api.ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
+>DocumentRoot "/var/www/html/ozone.best/backend/public"
+>DirectoryIndex /index.php
+>
+><IfModule mod_headers.c>
+>#        Header set Access-Control-Allow-Origin "*"
+></IfModule>
+>
+><Directory /var/www/html/ozone.best/backend/public>
+>       AllowOverride None
+>       Require all granted
+>       FallbackResource /index.php
+></Directory>
+>
+>ErrorLog ${APACHE_LOG_DIR}/error.log
+>CustomLog ${APACHE_LOG_DIR}/access.log combined
+>RewriteEngine on
+># Authorization  header
+># Règles spécifiques pour le bon fonctionnement du JWT
+>RewriteCond %{HTTP:Authorization} ^(.*)
+>RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
+># Some rewrite rules in this file were disabled on your HTTPS site,
+># because they have the potential to create redirection loops.
+>
+># RewriteCond %{SERVER_NAME} =api.ozone.best
+># RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+>
+>SSLCertificateFile /etc/letsencrypt/live/ozone.best-0001/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best-0001/privkey.pem
+>Include /etc/letsencrypt/options-ssl-apache.conf
+></VirtualHost>
+>```
+>_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
+
 ### **Installation PHP avec Apache (+ quelques extensions indispensables) :**
 [Lien vers la documentation complète](https://linuxize.com/post/how-to-install-php-on-debian-10/)
 
 `sudo apt install php libapache2-mod-php php-json php-mbstring php-zip php-gd php-xml php-curl php-mysql`
 
->**Installation de toutes les extensions Symfony pour PHP :**
+>**Installation de toutes les extensions Symfony pour PHP (optionel) :**
 >
 >`sudo apt install php-symfony*`
 
@@ -307,13 +327,13 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >ALTER USER 'root'@'localhost' IDENTIFIED VIA mysql_native_password;
 >ALTER USER 'root'@'localhost' IDENTIFIED BY 'new_root_password';
 >```
->_(Pour vérifier que çà fonctionne on tente de se reconnecter sans le sudo avec le mdp défini 'new_root_password')_
+>_Pour vérifier que çà fonctionne on tente de se reconnecter sans le sudo avec le mdp défini `new_root_password`_
 >
 >`mysql -u root -p`
 
 > **Créer un nouvelle utilisateur de la base de données avec les pleins pouvoirs :**
 > 
->_(remplacer 'user' et 'password' par les les identifiants souhaités)_
+>_Remplacer `user` et `password` par les les identifiants souhaités_
 >```sql
 >GRANT ALL ON *.* TO 'user'@'localhost' IDENTIFIED BY 'password';
 >FLUSH PRIVILEGES;
@@ -324,7 +344,7 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 
 > **[Télécharger la dernière version de phpMyAdmin](https://www.phpmyadmin.net/downloads/) :**
 >
->_(penser à adapter les commandes ci-dessus avec les bons numéros de version ici '5.0.2')_
+>_Penser à adapter les commandes ci-dessus avec les bons numéros de version ici : `5.0.2`)_
 >
 >`wget https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.zip`
 
@@ -332,7 +352,7 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >
 >`sudo apt install unzip`
 
-> **Décompression du package dans le dossier '/opt' :**
+> **Décompression du package dans le dossier `/opt` :**
 >
 >`sudo unzip phpMyAdmin-5.0.2-all-languages.zip -d /opt`
 
@@ -348,7 +368,7 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >
 >`sudo nano /etc/apache2/sites-available/phpmyadmin.conf`
 
-> **On met celà dedans :** _(Modifier le port *:9000 par autre chose si nécessaire et adresse mail 'ServerAdmin')_
+> **Contenu du fichier :** _(Modifier le port `*:9000` par autre chose si nécessaire ainsi que l'adresse mail `ServerAdmin`)_
 >
 >```
 ><VirtualHost *:9000>
@@ -366,7 +386,7 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 
-> **On modifie les ports écoutés par Apache :** _(On ajoute la ligne 'Listen 9000' ou autre si port changé à l'étape d'avant)_
+> **On modifie les ports écoutés par Apache :** _(On ajoute la ligne `Listen 9000` ou autre si port changé à l'étape d'avant)_
 >
 >`sudo nano /etc/apache2/ports.conf`
 >
@@ -398,24 +418,24 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >
 >`sudo systemctl restart apache2`
 
-> **On copie le fichier de conf phpMyAdmin par défaut :**
+> **On créé une copie du fichier de conf phpMyAdmin par défaut :**
 >
 >`sudo cp /opt/phpMyAdmin/config.sample.inc.php /opt/phpMyAdmin/config.inc.php`
 
-> **On génère un 'blowfish_secret' plus fort :**
+> **On génère un `blowfish_secret` plus fort :**
 > 
 > [Strong Password Generator](https://passwordsgenerator.net/)
 > 
-> 'Password_Length :' 64
+> Password_Length : `64`
 >  
-> 'Exclude Ambiguous Characters :' On coche
+> Exclude Ambiguous Characters : `On coche`
 > 
-> Puis on fait 'Generate'
+> Puis on clique sur `Generate`
 > 
-> exemple de password généré : XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W
+> exemple de password généré : `XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W`
 
 
-> **On modifie le blowfish_secret :**
+> **On modifie donc le blowfish_secret (en le remplaçant par celui généré ci-dessus):**
 >
 >`sudo nano /opt/phpMyAdmin/config.inc.php`
 >
@@ -433,18 +453,26 @@ https://github.com/nodesource/distributions
 
 https://github.com/lexik/LexikJWTAuthenticationBundle
 
-> **Génération des clefs private et public sur le serveur** :
->
->_Saisir la JWT passphrase renseignée dans le fichier .env lorsqu'il la demande_
->
+> **Génération des clefs `private` et `public` sur le serveur** :
+> - Création du dossier qui va contenir les clefs
+> 
 >`mkdir -p config/jwt`
+>
+> - Génération de la clef `private.pem`
 >
 >`openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096`
 >
+>
+>_Saisir la `JWT passphrase` renseignée dans le fichier `.env` lorsqu'il la demande_
+>
+> - Génération de la clef `public.pem`
+>
 >`openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout`
+>
+>_Saisir la `JWT passphrase` renseignée dans le fichier `.env` lorsqu'il la demande_
+>
 
 > **Règles à ajouter dans la config d'Apache (VirtualHost ou .htaccess)** :
->
 >```
 ># Règles spécifiques pour le bon fonctionnement du JWT
 ># Authorization  header
