@@ -1,20 +1,21 @@
 # **Installation de base du serveur :**
 
 ## **Mise en place de la sécurisation de la connexion SSH :**
-_(Dans cet exemple le serveur sera `ozone.best`)_
 
-> **Première connexion pour créer une entrée dans le known_hosts :**
+[Lien vers documentation complète](https://www.ssh.com/ssh/copy-id#setting-up-public-key-authentication)
+
+_Dans cet exemple l'adresse du serveur (domaine) sera : `ozone.best`_
+
+> **Première connexion pour créer une entrée dans le known_hosts de la machine cliente :**
 >
 >`ssh root@ozone.best` _(saisir le mot de passe root SSH qui vous a été communiqué)_
 
-> **Ajout de la clef SSH au serveur pour éviter de devoir rentrer le password à chaque connection :**
->
->[Lien vers documentation complète](https://www.ssh.com/ssh/copy-id#setting-up-public-key-authentication)
+> **Ajout de la clef SSH cliente au serveur pour éviter de devoir rentrer le password à chaque connexion :**
 >
 >`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best`
 
 ## **Création d'un nouvel utilisateur sudo :**
-_Dans cet exemple l'utilisateur sera `dbl-lnx`_
+_Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 
 > **Création de l'utilisateur :**
 >
@@ -34,13 +35,13 @@ _Dans cet exemple l'utilisateur sera `dbl-lnx`_
 >
 >`sudo swapon --show`
 >
->_Si un espace de SWAP existe çà doit retourner quelque chose comme ceci :_
+> - Si un espace de SWAP existe çà doit retourner quelque chose comme ceci :
 >
 >`NAME      TYPE SIZE USED PRIO`
 >
 >`/swapfile file   2G   0B   -2`
 >
->_Si aucun espace de SWAP n'existe çà ne retourne rien_
+> - Si aucun espace de SWAP n'existe çà ne retourne rien
 
 > **Création d'une partition swap de 2G :**
 >
@@ -557,18 +558,18 @@ https://github.com/nodesource/distributions
 https://github.com/lexik/LexikJWTAuthenticationBundle
 
 > **Génération des clefs `private` et `public` sur le serveur** :
-> - Création du dossier qui va contenir les clefs
+> 1) Création du dossier qui va contenir les clefs
 > 
 >`mkdir -p config/jwt`
 >
-> - Génération de la clef `private.pem`
+> 2) Génération de la clef `private.pem`
 >
 >`openssl genpkey -out config/jwt/private.pem -aes256 -algorithm rsa -pkeyopt rsa_keygen_bits:4096`
 >
 >
 >_Saisir la `JWT passphrase` renseignée dans le fichier `.env` lorsqu'il la demande_
 >
-> - Génération de la clef `public.pem`
+> 3) Génération de la clef `public.pem`
 >
 >`openssl pkey -in config/jwt/private.pem -out config/jwt/public.pem -pubout`
 >
