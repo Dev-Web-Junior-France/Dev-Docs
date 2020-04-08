@@ -52,7 +52,20 @@ _Dans cet exemple l'utilisateur sera `dbl-lnx`_
 >
 >`sudo swapon /swapfile`
 
-## **Installation LAMP Stack :**
+## **Installation de Webmin (pour avoir une interface Web pour la gestion du Serveur) :**
+> **Téléchargement de la clef de vérification (sécurité) :**
+> 
+> `wget http://www.webmin.com/jcameron-key.asc`
+
+> **Ajout de la clef de vérification (sécurité) au système :**
+> 
+> `sudo apt-key add jcameron-key.asc`
+
+> **Mise à jour des paquets disponibles & Installation de Webmin :**
+> 
+> `sudo apt update & sudo apt install webmin`
+
+## **Installation LAMP Stack (Linux/Apache/MySQL/PHP) :**
 
 ### **Ajout du repo Sury pour Debian 10 :**
 
@@ -151,10 +164,17 @@ _Dans cet exemple l'utilisateur sera `dbl-lnx`_
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 
+> **On oublie pas d'activer notre nouveau site avec la commande :**
+>
+>`sudo a2ensite ozone.best.conf`
+
 ### **Installation des certificats HTTPS (SSL/TLS) avec certbot pour Apache :**
 [Lien vers la documentation complète](https://linuxhint.com/setup_free_ssl_cert_apache_debian/)
+> **On installe les paquets nécessaires :**
 >
 >`sudo apt install certbot python-certbot-apache ca-certificates apt-transport-https -y`
+>
+> **On créé les certificats :**
 >
 >`sudo certbot --apache`
 >
@@ -182,7 +202,7 @@ _Dans cet exemple l'utilisateur sera `dbl-lnx`_
 >
 >`certbot renew`
 
-> **Forcer la redirection sur HTTPS via VirtualHosts (Ajout de la ligne 'Redirect permanent'):**
+> **Forcer la redirection sur HTTPS via VirtualHosts (Ajout de la ligne `Redirect permanent` dans `ozone.best.conf`):**
 >
 >```
 ># FRONTEND oZone
@@ -282,6 +302,89 @@ _Dans cet exemple l'utilisateur sera `dbl-lnx`_
 ></VirtualHost>
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
+
+### **Mise en place du support HTTP2 pour Apache :**
+[Lien vers la documentation complète](https://www.howtoforge.com/how-to-enable-http-2-in-apache/)
+>
+_**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
+
+> **On vérifie la version de PHP installée :**
+>
+>`php -v`
+>
+> Devrait normalement afficher quelque chose comme ceci :
+>```
+>PHP 7.4.4 (cli) (built: Mar 20 2020 14:30:40) ( NTS )
+>Copyright (c) The PHP Group
+>Zend Engine v3.4.0, Copyright (c) Zend Technologies
+>with Zend OPcache v7.4.4, Copyright (c), by Zend Technologies
+>```
+
+> **On installe la version de `php-fpm` correspondante :**
+>
+> `sudo apt install php7.4-fpm`
+ 
+> **On désactive le module `php7.4` actuellement en service :**
+>
+> `sudo a2dismod php7.4`
+
+> **On charge la config de `php7.4-fpm` :**
+>
+> `sudo a2enconf php7.4-fpm`
+
+> **On active le module `proxy_fcgi` & `setenvif` :**
+>
+> `sudo a2enmod proxy_fcgi && sudo a2enmod setenvif`
+
+> **On désactive le module `mpm_prefork` qui ne gère pas le HTTP2 :**
+>
+> `sudo a2dismod mpm_prefork`
+
+> **On active le module `mpm_event` qui gère le HTTP2 :**
+>
+> `sudo a2enmod mpm_event`
+
+> **On active les modules `ssl` & `http2` :**
+>
+> `sudo a2enmod ssl && sudo a2enmod http2`
+
+> **Maintenant il faut dire à Apache que l'on veut du `http2` :**
+>
+> - Soit dans la config d'Apache générale (pour que la directive s'applique à tous les sites) :
+>
+> `sudo nano /etc/apache2/apache2.conf`
+> 
+> Tout en bas du fichier, on ajoute ces deux lignes :
+>```
+># HTTP2 Support
+>Protocols h2 h2c http/1.1
+>```
+>
+> - Soit dans la config d'Apache d'un site en particulier (ici `ozone.best`) :
+>
+> `sudo nano /etc/apache2/sites-available/ozone.best-le-ssl.conf`
+> 
+> On ajoute cette ligne `Protocols h2 h2c http/1.1` :
+> 
+> 1) Pour le Frontend :
+>```
+><IfModule mod_ssl.c>
+>Protocols h2 h2c http/1.1
+># FRONTEND
+><VirtualHost *:443>
+>```
+> 
+> 2) Pour le Backend :
+>```
+><IfModule mod_ssl.c>
+>Protocols h2 h2c http/1.1
+># BACKEND
+><VirtualHost *:443>
+>```
+
+> **On redémarre Apache pour la prise en compte de tous ces changements :**
+>
+> `sudo systemctl restart apache2`
 
 ### **Installation PHP avec Apache (+ quelques extensions indispensables) :**
 [Lien vers la documentation complète](https://linuxize.com/post/how-to-install-php-on-debian-10/)
