@@ -1,17 +1,17 @@
 # **Installation de base du serveur :**
 
 ## **Mise en place de la sécurisation de la connection SSH :**
-_(Dans cet exemple le serveur sera 'geekoz.fr')_
+_(Dans cet exemple le serveur sera 'ozone.best')_
 
 > **Première connexion pour créer une entrée dans le known_hosts :**
 >
->`ssh root@geekoz.fr` _(saisir le mot de passe root SSH qui vous a été communiqué)_
+>`ssh root@ozone.best` _(saisir le mot de passe root SSH qui vous a été communiqué)_
 
 > **Ajout de la clef SSH au serveur pour éviter de devoir rentrer le password à chaque connection :**
 >
 >[Lien vers documentation complète](https://www.ssh.com/ssh/copy-id#setting-up-public-key-authentication)
 >
->`ssh-copy-id -i ~/.ssh/id_rsa root@geekoz.fr`
+>`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best`
 
 ## **Création d'un nouvel utilisateur sudo :**
 _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
@@ -92,8 +92,8 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >```
 ># FRONTEND oZone
 ><VirtualHost *:80>
->ServerName www.geekoz.fr
->ServerAdmin webmaster@localhost
+>ServerName ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
 >DocumentRoot "/var/www/html/ozone/frontend/dist"
 >
 ><Directory /var/www/html/ozone/frontend/dist>
@@ -113,14 +113,14 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >
 >ErrorLog ${APACHE_LOG_DIR}/error.log
 >CustomLog ${APACHE_LOG_DIR}/access.log combined
->RewriteCond %{SERVER_NAME} =www.geekoz.fr
+>RewriteCond %{SERVER_NAME} =ozone.best
 >RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ></VirtualHost>
 >
 ># BACKEND oZone
 ><VirtualHost *:80>
->ServerName api.geekoz.fr
->ServerAdmin webmaster@localhost
+>ServerName api.ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
 >DocumentRoot "/var/www/html/ozone/backend/public"
 >DirectoryIndex /index.php
 >
@@ -152,8 +152,8 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 ># FRONTEND oZone
 ><IfModule mod_ssl.c>
 ><VirtualHost *:443>
->ServerName www.geekoz.fr
->ServerAdmin webmaster@localhost
+>ServerName ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
 >DocumentRoot "/var/www/html/ozone/frontend/dist"
 >
 ><Directory /var/www/html/ozone/frontend/dist>
@@ -175,16 +175,16 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 >CustomLog ${APACHE_LOG_DIR}/access.log combined
 >
 >Include /etc/letsencrypt/options-ssl-apache.conf
->SSLCertificateFile /etc/letsencrypt/live/www.geekoz.fr/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/www.geekoz.fr/privkey.pem
+>SSLCertificateFile /etc/letsencrypt/live/ozone.best/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best/privkey.pem
 ></VirtualHost>
 ></IfModule>
 >
 ># BACKEND oZone
 ><IfModule mod_ssl.c>
 ><VirtualHost *:443>
->ServerName api.geekoz.fr
->ServerAdmin webmaster@localhost
+>ServerName api.ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
 >DocumentRoot "/var/www/html/ozone/backend/public"
 >DirectoryIndex /index.php
 >
@@ -209,8 +209,8 @@ _(Dans cet exemple l'utilisateur sera 'dbl-lnx')_
 ># Authorization  header
 >RewriteCond %{HTTP:Authorization} ^(.*)
 >RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
->SSLCertificateFile /etc/letsencrypt/live/api.geekoz.fr/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/api.geekoz.fr/privkey.pem
+>SSLCertificateFile /etc/letsencrypt/live/api.ozone.best/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/api.ozone.best/privkey.pem
 >Include /etc/letsencrypt/options-ssl-apache.conf
 ></VirtualHost>
 ></IfModule>
@@ -227,9 +227,9 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 >
 >```
 > - Congratulations! Your certificate and chain have been saved at:
->   /etc/letsencrypt/live/api.geekoz.fr/fullchain.pem
+>   /etc/letsencrypt/live/api.ozone.best/fullchain.pem
 >   Your key file has been saved at:
->   /etc/letsencrypt/live/api.geekoz.fr/privkey.pem
+>   /etc/letsencrypt/live/api.ozone.best/privkey.pem
 >   Your cert will expire on 2020-04-24. To obtain a new or tweaked
 >   version of this certificate in the future, simply run certbot again
 >   with the "certonly" option. To non-interactively renew *all* of
@@ -244,6 +244,24 @@ https://linuxhint.com/setup_free_ssl_cert_apache_debian/
 > **Pour renouveller tous les certificats :**
 >
 >`certbot renew`
+
+> **Forcer la redirection sur HTTPS via VirtualHosts :**
+>
+>```
+># FRONTEND oZone
+><VirtualHost *:80>
+>ServerName ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
+>DocumentRoot "/var/www/html/ozone.best/frontend/dist"
+>Redirect permanent / https://ozone.best/
+>
+># BACKEND oZone
+><VirtualHost *:80>
+>ServerName api.ozone.best
+>ServerAdmin dbl.bzh@mailfence.com
+>DocumentRoot "/var/www/html/ozone.best/backend/public"
+>Redirect permanent / https://api.ozone.best/
+>```
 
 ### **Installation PHP avec Apache (+ quelques extensions indispensables) :**
 [Lien vers la documentation complète](https://linuxize.com/post/how-to-install-php-on-debian-10/)
