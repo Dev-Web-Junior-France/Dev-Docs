@@ -1,2 +1,2 @@
 # dev-docs
-Repository regroupant divers documentations et procédures concernant le Développement Web.
+Repository regroupant diverses documentations et procédures concernant le Développement Web.
