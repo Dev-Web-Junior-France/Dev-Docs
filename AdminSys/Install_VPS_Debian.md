@@ -27,7 +27,7 @@ _Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 >
 >`usermod -aG sudo dbl-lnx`
 
-> **Connexi immédiate on sur ce nouvel utilisateur :**
+> **Connexion immédiate sur ce nouvel utilisateur :**
 >
 >`su - dbl-lnx`
 
