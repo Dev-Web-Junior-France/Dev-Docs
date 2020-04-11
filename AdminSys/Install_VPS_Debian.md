@@ -76,11 +76,16 @@
 >
 >`sudo apt-get install apache2 apache2-doc`
 
-#### **Modification des droits sur le dossier `/var/www/html/ozone.best`, qui contient notre site (Front & Back) :**
+#### **Création du dossier `/var/www/html/ozone.best`, qui contient notre site (Front & Back) :**
 
+>`sudo mkdir /var/www/html/ozone.best`
+
+#### **Modification des droits sur le dossier `/var/www/html/ozone.best`**
 >`sudo chown -R $USER:www-data /var/www/html/ozone.best`
 >
 >`sudo chmod -R g+rw /var/www/html/ozone.best`
+>
+>_Ces commandes devront surement être réutilisées à chaque nouvelle mise en prod de votre site_
 
 #### **Dossier de création des VirtualHosts pour chacun de nos nouveaux sites :**
 
@@ -387,11 +392,11 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >
 > `sudo systemctl restart apache2`
 
-> **On vérifie que le serveur Web tourne biene n HTTP2 à présent :**
+> **On vérifie que le serveur Web tourne bien en HTTP2 à présent :**
 > 
 > https://tools.keycdn.com/http2-test
 >
-> _Normalement çà devrait donner çà :_
+> _Normalement çà devrait donner çà quelque chose comme çà :_
 > 
 > ![logo](images/http2_ok.png)
 
