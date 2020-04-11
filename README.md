@@ -1,2 +1,2 @@
 # dev-docs
-Repository regroupant toutes les notes de dev
+Repository regroupant divers documentations et procédures concernant le Développement Web.
