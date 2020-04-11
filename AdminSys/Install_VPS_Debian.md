@@ -1,6 +1,6 @@
 # **Installation de base du serveur :**
 
-(sur VPS OVH Modèle `VPS 2018 SSD 1`)
+(sur VPS OVH Modèle `VPS 2018 SSD 1` avec une Debian 10 fraichement installée)
 
 ## **Mise en place de la sécurisation de la connexion SSH :**
 
