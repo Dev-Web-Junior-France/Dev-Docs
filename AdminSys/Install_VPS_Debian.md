@@ -55,7 +55,7 @@ _Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 >
 >`sudo swapon /swapfile`
 
-## **Installation de Webmin (pour avoir une interface Web pour la gestion du Serveur) :**
+## **Installation de Webmin (interface Web pour la gestion du Serveur) :**
 > **Téléchargement de la clef de vérification (sécurité) :**
 > 
 > `wget http://www.webmin.com/jcameron-key.asc`
