@@ -1,12 +1,17 @@
 # **Installation de base du serveur :**
 
-(sur VPS OVH Modèle `VPS 2018 SSD 1` avec une Debian 10 fraichement installée)
+**Sur VPS OVH Modèle `VPS 2018 SSD 1` avec une Debian 10 fraichement installée !**
+
+>**Voici les données `serveur/utilisateur` utilisées dans cette documentation :**
+> - Nom de l'utilisateur Linux à créer : `dbl-lnx`
+> - Adresse mail de l'admin du Serveur : `dbl-bzh@mailfence.com`
+> - Nom de domaine du serveur VPS : `ozone.best`
+> 
+>_Un petit rechercher et remplacer dans tout le document pour adapter à votre cas !_
 
 ## **Mise en place de la sécurisation de la connexion SSH :**
 
 [Lien vers documentation complète](https://www.ssh.com/ssh/copy-id#setting-up-public-key-authentication)
-
-_Dans cet exemple l'adresse du serveur (domaine) sera : `ozone.best`_
 
 > **Première connexion pour créer une entrée dans le known_hosts de la machine cliente :**
 >
@@ -17,7 +22,6 @@ _Dans cet exemple l'adresse du serveur (domaine) sera : `ozone.best`_
 >`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best`
 
 ## **Création d'un nouvel utilisateur sudo :**
-_Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 
 > **Création de l'utilisateur :**
 >
@@ -55,28 +59,13 @@ _Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 >
 >`sudo swapon /swapfile`
 
-## **Installation de Webmin (interface Web pour la gestion du Serveur) :**
-> **Téléchargement de la clef de vérification (sécurité) :**
-> 
-> `wget http://www.webmin.com/jcameron-key.asc`
-
-> **Ajout de la clef de vérification (sécurité) au système :**
-> 
-> `sudo apt-key add jcameron-key.asc`
-
-> **Mise à jour des paquets disponibles & Installation de Webmin :**
-> 
-> `sudo apt update & sudo apt install webmin`
-
 ## **Installation LAMP Stack (Linux/Apache/MySQL/PHP) :**
 
 ### **Ajout du repo Sury pour Debian 10 :**
-
+ _Contient notamment les dernières versions de PHP et Extensions_
 > **Ajout de GNUPG pour la gestion sécurisée des repositories additionnels :**
 > 
 > `sudo apt install gnupg`
->
-> _(Contient notament les dernières versions de PHP et Extensions)_
 >
 >`wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -`
 >
@@ -306,6 +295,15 @@ _Dans cet exemple l'utilisateur sera : `dbl-lnx`_
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 
+### **Installation PHP avec Apache (+ quelques extensions indispensables) :**
+[Lien vers la documentation complète](https://linuxize.com/post/how-to-install-php-on-debian-10/)
+
+`sudo apt install php libapache2-mod-php php-json php-mbstring php-zip php-gd php-xml php-curl php-mysql`
+
+>**Installation de toutes les extensions Symfony pour PHP (optionel) :**
+>
+>`sudo apt install php-symfony*`
+
 ### **Mise en place du support HTTP2 pour Apache :**
 [Lien vers la documentation complète](https://www.howtoforge.com/how-to-enable-http-2-in-apache/)
 >
@@ -389,14 +387,13 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >
 > `sudo systemctl restart apache2`
 
-### **Installation PHP avec Apache (+ quelques extensions indispensables) :**
-[Lien vers la documentation complète](https://linuxize.com/post/how-to-install-php-on-debian-10/)
-
-`sudo apt install php libapache2-mod-php php-json php-mbstring php-zip php-gd php-xml php-curl php-mysql`
-
->**Installation de toutes les extensions Symfony pour PHP (optionel) :**
+> **On vérifie que le serveur Web tourne biene n HTTP2 à présent :**
+> 
+> https://tools.keycdn.com/http2-test
 >
->`sudo apt install php-symfony*`
+> _Normalement çà devrait donner çà :_
+> 
+> ![logo](images/http2_ok.png)
 
 ### **Installation de MariaDB Server :**
 [Lien vers la documentation complète](https://linuxize.com/post/how-to-install-mariadb-on-debian-10/)
@@ -445,8 +442,18 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >FLUSH PRIVILEGES;
 >```
 
-### **Installation de PHPMyAdmin :**
+### **Installation de PHPMyAdmin (avec support HTTPS):**
 [Lien vers la documentation complète](https://linuxhint.com/install_phpmyadmin_debian_10/)
+
+> **On créé un alias de domaine sur l'interface de gestion du domaine :**
+> 
+> Pour `ozone.best` chez OVH l'url est :
+> 
+> https://www.ovh.com/manager/web/#/configuration/domain/ozone.best/zone
+> 
+> Ajouter une entrée de ce type en mode textuel : _(Remplacer `IP` par l'IPV4 de votre VPS)_
+> 
+>`pma       IN A      IP`
 
 > **[Télécharger la dernière version de phpMyAdmin](https://www.phpmyadmin.net/downloads/) :**
 >
@@ -470,24 +477,53 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >
 >`sudo chown -Rfv www-data:www-data /opt/phpMyAdmin`
 
+> **On créé une copie du fichier de conf phpMyAdmin d'exemple par défaut :**
+>
+>`sudo cp /opt/phpMyAdmin/config.sample.inc.php /opt/phpMyAdmin/config.inc.php`
+
+> **On génère un `blowfish_secret` plus fort :**
+> 
+> [Strong Password Generator](https://passwordsgenerator.net/)
+> 
+> Password Length : `64`
+>  
+> Exclude Ambiguous Characters : `On coche`
+> 
+> Puis on clique sur `Generate`
+> 
+> exemple de password généré : `XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W`
+
+
+> **On modifie donc le blowfish_secret (en le remplaçant par celui généré ci-dessus):**
+>
+>`sudo nano /opt/phpMyAdmin/config.inc.php`
+>
+>```
+>$cfg['blowfish_secret'] = 'XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W';
+>```
+>_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
+
 > **On edite un fichier de conf Apache pour phpMyAdmin :**
 >
 >`sudo nano /etc/apache2/sites-available/phpmyadmin.conf`
 
-> **Contenu du fichier :** _(Modifier le port `*:9000` par autre chose si nécessaire ainsi que l'adresse mail `ServerAdmin`)_
+> **Contenu du fichier :** 
+> 
+> _Modifier le port `*:9000` par autre chose si nécessaire ainsi que l'adresse mail `ServerAdmin`_
 >
 >```
 ><VirtualHost *:9000>
 >ServerAdmin dbl.bzh@mailfence.com
+>ServerName pma.ozone.best
 >DocumentRoot /opt/phpMyAdmin
 > 
 ><Directory /opt/phpMyAdmin>
->Options Indexes FollowSymLinks
->AllowOverride none
->Require all granted
+>       Options Indexes FollowSymLinks
+>       AllowOverride none
+>       Require all granted
 ></Directory>
->ErrorLog ${APACHE_LOG_DIR}/error_phpmyadmin.log
->CustomLog ${APACHE_LOG_DIR}/access_phpmyadmin.log combined
+>       ErrorLog ${APACHE_LOG_DIR}/error_phpmyadmin.log
+>       CustomLog ${APACHE_LOG_DIR}/access_phpmyadmin.log combined
 ></VirtualHost>
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
@@ -524,38 +560,91 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >
 >`sudo systemctl restart apache2`
 
-> **On créé une copie du fichier de conf phpMyAdmin par défaut :**
+> **Vous devriez normalement pouvoir accéder à PMA via l'adresse de cette forme :**
 >
->`sudo cp /opt/phpMyAdmin/config.sample.inc.php /opt/phpMyAdmin/config.inc.php`
+> https://ozone.best:9000 _(remplacer par votre domaine à vous si ce n'est pas déjà fait)_
+> 
+>_Il vous dit sûrement que le certificat HTTPS n'est pas bon (un point d'exclamation sur le petit cadenas !)_
 
-> **On génère un `blowfish_secret` plus fort :**
-> 
-> [Strong Password Generator](https://passwordsgenerator.net/)
-> 
-> Password_Length : `64`
->  
-> Exclude Ambiguous Characters : `On coche`
-> 
-> Puis on clique sur `Generate`
-> 
-> exemple de password généré : `XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W`
-
-
-> **On modifie donc le blowfish_secret (en le remplaçant par celui généré ci-dessus):**
+> **Il suffit maintenant d'utiliser `certbot` pour générer un certificat pour pma :**
 >
->`sudo nano /opt/phpMyAdmin/config.inc.php`
+>`sudo certbot --apache`
 >
+> - On séléctionne le choix correspondant à `pma` dans les choix proposés
+> - On séléctionne ensuite l'option `2` pour forcer la redirection sur HTTPS
+
+> **On va ensuite vérifier notre fichier de conf Apache généré `phpmyadmin-le-ssl.conf` :**
+> 
+> `sudo nano /etc/apache2/sites-available/phpmyadmin-le-ssl.Conf`
+>
+> _**Dans ce fichier on devrait normalement avoir quelque chose comme ceci :**_
+> 
+> _Qui dit qu'on charge le certificat ssl généré à l'étape précédente seulement si le module Apache SSL est activé !_
+> 
+> _Personnellement j'en ai profité pour réindenter tout çà afin de le rendre plus clair à lire..._
+> 
 >```
->$cfg['blowfish_secret'] = 'XaHLA&rQh+5xXmc3Q#&4D#T!#=eX*y#sRx6F_fxXnuZYugBvFa+3xj9^es=Esj#W';
+> <IfModule mod_ssl.c>
+>        <VirtualHost *:443>
+>        ServerAdmin dbl.bzh@mailfence.com
+>        ServerName pma.ozone.best
+>        DocumentRoot /opt/phpMyAdmin
+>
+>        <Directory /opt/phpMyAdmin>
+>                Options Indexes FollowSymLinks
+>                AllowOverride none
+>                Require all granted
+>        </Directory>
+>                ErrorLog ${APACHE_LOG_DIR}/error_phpmyadmin.log
+>                CustomLog ${APACHE_LOG_DIR}/access_phpmyadmin.log combined
+>                Include /etc/letsencrypt/options-ssl-apache.conf
+>                SSLCertificateFile /etc/letsencrypt/live/pma.ozone.best/fullchain.pem
+>                SSLCertificateKeyFile /etc/letsencrypt/live/pma.ozone.best/privkey.pem
+>        </VirtualHost>
+></IfModule>
+>
+><VirtualHost *:9000>
+>ServerAdmin dbl.bzh@mailfence.com
+>ServerName pma.ozone.best
+>DocumentRoot /opt/phpMyAdmin
+>
+><Directory /opt/phpMyAdmin>
+>        Options Indexes FollowSymLinks
+>        AllowOverride none
+>        Require all granted
+></Directory>
+>        ErrorLog ${APACHE_LOG_DIR}/error_phpmyadmin.log
+>        CustomLog ${APACHE_LOG_DIR}/access_phpmyadmin.log combined
+></VirtualHost>
 >```
 >_On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 
+> **On redémarre le service Apache :**
+>
+>`sudo systemctl restart apache2`
 
-### **Installation de Node.js :**
+> **Voilà si votre pma est sécurisé par certificat SSL, le cadenas est débarrassé de ce facheux point d'exclamation !**
+> 
+> ![logo](images/ssl_ok.png)
+
+## **Installation de Webmin (interface Web pour la gestion du Serveur) :**
+> **Téléchargement de la clef de vérification (sécurité) :**
+> 
+> `wget http://www.webmin.com/jcameron-key.asc`
+
+> **Ajout de la clef de vérification (sécurité) au système :**
+> 
+> `sudo apt-key add jcameron-key.asc`
+
+> **Mise à jour des paquets disponibles & Installation de Webmin :**
+> 
+> `sudo apt update & sudo apt install webmin`
+
+## **Installation de Node.js :**
 
 https://github.com/nodesource/distributions
 
-### **Installation de LexikJWTBundle :**
+## **Installation de LexikJWTBundle :**
 
 https://github.com/lexik/LexikJWTAuthenticationBundle
 
