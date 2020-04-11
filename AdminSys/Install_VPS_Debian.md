@@ -1,4 +1,4 @@
-# **Installation de base du serveur :**
+# **Installation de base du serveur (sur VPS OVH Modèle `VPS 2018 SSD 1`) :**
 
 ## **Mise en place de la sécurisation de la connexion SSH :**
 
