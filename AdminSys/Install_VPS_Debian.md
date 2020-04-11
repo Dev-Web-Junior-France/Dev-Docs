@@ -630,7 +630,13 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 
 > **Voilà si votre pma est sécurisé par certificat SSL, le cadenas est débarrassé de ce facheux point d'exclamation !**
 > 
-> ![logo](images/ssl_ok.png)
+> _Voici ce que çà donne sous Firefox :_
+> 
+> ![logo](images/ssl_ok_firefox.png)
+> 
+> _Voici ce que çà donne sous Chrome :_
+> 
+> ![logo](images/ssl_ok_chrome.png)
 
 ## **Installation de Webmin (interface Web pour la gestion du Serveur) :**
 > **Téléchargement de la clef de vérification (sécurité) :**
@@ -643,7 +649,27 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 
 > **Mise à jour des paquets disponibles & Installation de Webmin :**
 > 
-> `sudo apt update & sudo apt install webmin`
+> `sudo apt update && sudo apt install webmin`
+
+> **Sécuriser l'accès à Webmin en intégrant le certificat SSL précédemment généré :**
+> 
+> - Rendez-vous à l'adresse suivante :
+> _(Adaptez l'url pour votre domaine si ce n'est pas déjà fait !)_
+> 
+> https://ozone.best:10000/webmin/edit_ssl.cgi?xnavigation=1
+> 
+> _Les identifiants de connexion à Webmin sont vos identifiants Linux, ceux générés lors de le création de l'utilisateur en ligne de commande SSH au tout début de cette documentation._
+> 
+> - On se rend sur l'onglet `Let's Encrypt` :
+> 
+> ![logo](images/webmin_ssl_cert_install.png)
+> - Vous pouvez utiliser le `automatic renewal`, personnellement j'ai choisi de renouveler tous les mois !
+> 
+> - Puis cliquer sur `Request Certificate`
+> 
+>  - Si tout se passe bien vous obtiendrez (votre certificat sera déclaré pour webmin également) :
+> 
+> ![logo](images/webmin_ssl_cert_installed.png)
 
 ## **Installation de Node.js :**
 
