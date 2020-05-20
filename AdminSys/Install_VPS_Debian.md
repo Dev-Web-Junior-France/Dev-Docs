@@ -59,6 +59,16 @@
 >
 >`sudo swapon /swapfile`
 
+> **On créé un alias de domaine pour notre API sur l'interface de gestion du domaine :**
+> 
+> Pour `ozone.best` chez OVH l'url est :
+> 
+> https://www.ovh.com/manager/web/#/configuration/domain/ozone.best/zone
+> 
+> Ajouter une entrée de ce type en mode textuel : _(Remplacer `IP` par l'IPV4 de votre VPS)_
+> 
+>`api       IN A      IP`
+
 ## **Installation LAMP Stack (Linux/Apache/MySQL/PHP) :**
 
 ### **Ajout du repo Sury pour Debian 10 :**
