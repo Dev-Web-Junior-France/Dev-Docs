@@ -408,7 +408,7 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 > 
 > https://tools.keycdn.com/http2-test
 >
-> _Normalement çà devrait donner çà quelque chose comme çà :_
+> _Normalement çà devrait donner quelque chose comme çà :_
 > 
 > ![logo](images/http2_ok.png)
 
