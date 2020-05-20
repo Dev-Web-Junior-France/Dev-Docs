@@ -59,7 +59,9 @@
 >
 >`sudo swapon /swapfile`
 
-> **On créé un alias de domaine pour notre API sur l'interface de gestion du domaine :**
+## **On créé un alias de domaine pour notre API :**
+
+> ** Via l'interface de gestion du domaine :**
 > 
 > Pour `ozone.best` chez OVH l'url est :
 > 
