@@ -61,7 +61,7 @@
 
 ## **On créé un alias de domaine pour notre API :**
 
-> ** Via l'interface de gestion du domaine :**
+> **Via l'interface de gestion du domaine :**
 > 
 > Pour `ozone.best` chez OVH l'url est :
 > 
