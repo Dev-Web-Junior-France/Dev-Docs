@@ -5,7 +5,7 @@
 >**Voici les données `serveur/utilisateur` utilisées dans cette documentation :**
 > - Nom de l'utilisateur Linux à créer : `dbl-lnx`
 > - Adresse mail de l'admin du Serveur : `dbl-bzh@mailfence.com`
-> - Nom de domaine du serveur VPS : `ozone.best` (peut être remplacé par l'adresse IP du serveur si aucun domaine associé)
+> - Nom de domaine du serveur VPS : `depan-heure.com` (peut être remplacé par l'adresse IP du serveur si aucun domaine associé)
 > 
 >_Un petit rechercher et remplacer dans tout le document pour adapter à votre cas !_
 
@@ -15,7 +15,7 @@
 
 >**Première connexion en root pour créer une entrée dans le known_hosts de la machine cliente :**
 >
->`ssh root@ozone.best` _(saisir le mot de passe root SSH qui vous a été communiqué par mail suite à l'installation du VPS)_
+>`ssh root@depan-heure.com` _(saisir le mot de passe root SSH qui vous a été communiqué par mail suite à l'installation du VPS)_
 
 >**Pour des raisons de sécurité, commencer par changer le port par défaut d'utilisation de SSH :**
 >
@@ -41,19 +41,19 @@
 >
 > Ce sera normalement la dernière ligne du fichier.
 > 
-> Elle contiendra le nom de domaine `ozone.best` ou l'adresse IP, si vous n'avez pas de domaine
+> Elle contiendra le nom de domaine `depan-heure.com` ou l'adresse IP, si vous n'avez pas de domaine
 > 
-> Exemple : `ozone.best ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbm`...
+> Exemple : `depan-heure.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbm`...
 >
 > _On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
 >
-> On se reconnecte en tapant `ssh root@ozone.best -p 22522` pour ajouter une nouvelle entrée au fichier `~/.ssh/known_hosts` (on précise cette fois le port à utiliser)
+> On se reconnecte en tapant `ssh root@depan-heure.com -p 22522` pour ajouter une nouvelle entrée au fichier `~/.ssh/known_hosts` (on précise cette fois le port à utiliser)
 > 
 > On se déconnecte en tapant `exit`
 
 > **Ajout de la clef SSH cliente au serveur pour éviter de devoir rentrer le password à chaque connexion :**
 >
->`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best -p 22522`
+>`ssh-copy-id -i ~/.ssh/id_rsa root@depan-heure.com -p 22522`
 
 ## **Création d'un nouvel utilisateur sudo :**
 
@@ -71,7 +71,7 @@
 
 >Si vous le souhaitez vous pouvez également copier la clef SSH, depuis la ligne de commande de votre système, comme pour le compte root afin de ne plus devoir saisir le mot de passe à chaque connexion :
 >
->`ssh-copy-id -i ~/.ssh/id_rsa -p 22522 dbl-lnx@ozone.best`
+>`ssh-copy-id -i ~/.ssh/id_rsa -p 22522 dbl-lnx@depan-heure.com`
 
 ## **Création d'un espace de swap :**
 
@@ -97,13 +97,23 @@
 >
 >`sudo swapon /swapfile`
 
+## **Installation de GIT, création de la clef SSH et association avec GITHUB :**
+
+> **Installation de GIT :**
+>
+>`sudo apt install git`
+
+> **Création de la clef SSH et association avec GITHUB :**
+>
+> - https://fr.w3docs.com/snippets/git/comment-generer-une-cle-ssh-pour-git.html
+
 ## **On créé un alias de domaine pour notre API :**
 
 > **Via l'interface de gestion du domaine :**
 > 
-> Pour `ozone.best` chez OVH l'url est :
+> Pour `depan-heure.com` chez OVH l'url est :
 > 
-> https://www.ovh.com/manager/web/#/configuration/domain/ozone.best/zone
+> https://www.ovh.com/manager/web/#/configuration/domain/depan-heure.com/zone
 > 
 > Ajouter une entrée de ce type en mode textuel : _(Remplacer `IP` par l'IPV4 de votre VPS)_
 > 
@@ -128,14 +138,14 @@
 >
 >`sudo apt-get install apache2 apache2-doc`
 
-#### **Création du dossier `/var/www/html/ozone.best`, qui contient notre site (Front & Back) :**
+#### **Création du dossier `/var/www/html/depan-heure.com`, qui contient notre site (Front & Back) :**
 
->`sudo mkdir /var/www/html/ozone.best`
+>`sudo mkdir /var/www/html/depan-heure.com`
 
-#### **Modification des droits sur le dossier `/var/www/html/ozone.best`**
->`sudo chown -R $USER:www-data /var/www/html/ozone.best`
+#### **Modification des droits sur le dossier `/var/www/html/depan-heure.com`**
+>`sudo chown -R $USER:www-data /var/www/html/depan-heure.com`
 >
->`sudo chmod -R g+rw /var/www/html/ozone.best`
+>`sudo chmod -R g+rw /var/www/html/depan-heure.com`
 >
 >_Ces commandes devront surement être réutilisées à chaque nouvelle mise en prod de votre site_
 
@@ -147,21 +157,21 @@
 >
 >_Les fichiers de conf des sites se trouvent dans  `/etc/apache2/sites-available/`_
 
-> **On va maintenant créer un nouveau fichier pour `ozone.best` :**
+> **On va maintenant créer un nouveau fichier pour `depan-heure.com` :**
 >
->`sudo nano /etc/apache2/sites-available/ozone.best.conf`
+>`sudo nano /etc/apache2/sites-available/depan-heure.com.conf`
 
 > **Contenu du fichier pour Frontend React + Backend Api Symfo sur le même serveur :**
 >
 >```
 ># FRONTEND 
 ><VirtualHost *:80>
->ServerName ozone.best
+>ServerName depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/frontend/dist"
->Redirect permanent / https://ozone.best/
+>DocumentRoot "/var/www/html/depan-heure.com/frontend/dist"
+>Redirect permanent / https://depan-heure.com/
 >
-><Directory /var/www/html/ozone.best/frontend/dist>
+><Directory /var/www/html/depan-heure.com/frontend/dist>
 >       Options +Indexes +Includes +FollowSymLinks +MultiViews
 >       AllowOverride All
 >               <IfModule mod_rewrite.c>
@@ -178,23 +188,23 @@
 >
 >ErrorLog ${APACHE_LOG_DIR}/error.log
 >CustomLog ${APACHE_LOG_DIR}/access.log combined
->RewriteCond %{SERVER_NAME} =ozone.best
+>RewriteCond %{SERVER_NAME} =depan-heure.com
 >RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ></VirtualHost>
 >
 ># BACKEND 
 ><VirtualHost *:80>
->ServerName api.ozone.best
+>ServerName api.depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/backend/public"
->Redirect permanent / https://api.ozone.best/
+>DocumentRoot "/var/www/html/depan-heure.com/backend/public"
+>Redirect permanent / https://api.depan-heure.com/
 >DirectoryIndex /index.php
 >
 ><IfModule mod_headers.c>
 >        Header set Access-Control-Allow-Origin "*"
 ></IfModule>
 >
-><Directory /var/www/html/ozone.best/backend/public>
+><Directory /var/www/html/depan-heure.com/backend/public>
 >       AllowOverride None
 >       Require all granted
 >       FallbackResource /index.php
@@ -207,7 +217,7 @@
 ># Règles spécifiques pour le bon fonctionnement du JWT
 >RewriteCond %{HTTP:Authorization} ^(.*)
 >RewriteRule .* - [e=HTTP_AUTHORIZATION:%1]
->RewriteCond %{SERVER_NAME} =api.ozone.best
+>RewriteCond %{SERVER_NAME} =api.depan-heure.com
 >RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 ></VirtualHost>
 >```
@@ -215,7 +225,7 @@
 
 > **On oublie pas d'activer notre nouveau site avec la commande :**
 >
->`sudo a2ensite ozone.best.conf`
+>`sudo a2ensite depan-heure.com.conf`
 
 ### **Installation des certificats HTTPS (SSL/TLS) avec certbot pour Apache :**
 [Lien vers la documentation complète](https://linuxhint.com/setup_free_ssl_cert_apache_debian/)
@@ -233,9 +243,9 @@
 >
 >```
 > - Congratulations! Your certificate and chain have been saved at:
->   /etc/letsencrypt/live/api.ozone.best/fullchain.pem
+>   /etc/letsencrypt/live/api.depan-heure.com/fullchain.pem
 >   Your key file has been saved at:
->   /etc/letsencrypt/live/api.ozone.best/privkey.pem
+>   /etc/letsencrypt/live/api.depan-heure.com/privkey.pem
 >   Your cert will expire on 2020-04-24. To obtain a new or tweaked
 >   version of this certificate in the future, simply run certbot again
 >   with the "certonly" option. To non-interactively renew *all* of
@@ -251,27 +261,27 @@
 >
 >`certbot renew`
 
-> **Forcer la redirection sur HTTPS via VirtualHosts (Ajout de la ligne `Redirect permanent` dans `ozone.best.conf`):**
+> **Forcer la redirection sur HTTPS via VirtualHosts (Ajout de la ligne `Redirect permanent` dans `depan-heure.com.conf`):**
 >
 >```
 ># FRONTEND oZone
 ><VirtualHost *:80>
->ServerName ozone.best
+>ServerName depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/frontend/dist"
->Redirect permanent / https://ozone.best/
+>DocumentRoot "/var/www/html/depan-heure.com/frontend/dist"
+>Redirect permanent / https://depan-heure.com/
 >
 ># BACKEND oZone
 ><VirtualHost *:80>
->ServerName api.ozone.best
+>ServerName api.depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/backend/public"
->Redirect permanent / https://api.ozone.best/
+>DocumentRoot "/var/www/html/depan-heure.com/backend/public"
+>Redirect permanent / https://api.depan-heure.com/
 >```
 
 > **Lors de la génération des certificats HTTPS (SSL/TLS), une réplique du fichier .conf est créée :**
 >
->`sudo nano /etc/apache2/sites-available/ozone.best-le-ssl.conf`
+>`sudo nano /etc/apache2/sites-available/depan-heure.com-le-ssl.conf`
 
 > **Contenu du fichier pour Frontend React + Backend Api Symfo sur le même serveur :**
 >
@@ -280,11 +290,11 @@
 >Protocols h2 h2c http/1.1
 ># FRONTEND
 ><VirtualHost *:443>
->ServerName ozone.best
+>ServerName depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/frontend/dist"
+>DocumentRoot "/var/www/html/depan-heure.com/frontend/dist"
 >
-><Directory /var/www/html/ozone.best/frontend/dist>
+><Directory /var/www/html/depan-heure.com/frontend/dist>
 >       Options +Indexes +Includes +FollowSymLinks +MultiViews
 >       AllowOverride All
 >               <IfModule mod_rewrite.c>
@@ -304,12 +314,12 @@
 ># Some rewrite rules in this file were disabled on your HTTPS site,
 ># because they have the potential to create redirection loops.
 >
-># RewriteCond %{SERVER_NAME} =ozone.best
+># RewriteCond %{SERVER_NAME} =depan-heure.com
 ># RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 >
 >
->SSLCertificateFile /etc/letsencrypt/live/ozone.best-0001/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best-0001/privkey.pem
+>SSLCertificateFile /etc/letsencrypt/live/depan-heure.com-0001/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/depan-heure.com-0001/privkey.pem
 >Include /etc/letsencrypt/options-ssl-apache.conf
 ></VirtualHost>
 ></IfModule>
@@ -317,16 +327,16 @@
 ># BACKEND
 ><IfModule mod_ssl.c>
 ><VirtualHost *:443>
->ServerName api.ozone.best
+>ServerName api.depan-heure.com
 >ServerAdmin dbl.bzh@mailfence.com
->DocumentRoot "/var/www/html/ozone.best/backend/public"
+>DocumentRoot "/var/www/html/depan-heure.com/backend/public"
 >DirectoryIndex /index.php
 >
 ><IfModule mod_headers.c>
 >#        Header set Access-Control-Allow-Origin "*"
 ></IfModule>
 >
-><Directory /var/www/html/ozone.best/backend/public>
+><Directory /var/www/html/depan-heure.com/backend/public>
 >       AllowOverride None
 >       Require all granted
 >       FallbackResource /index.php
@@ -342,11 +352,11 @@
 ># Some rewrite rules in this file were disabled on your HTTPS site,
 ># because they have the potential to create redirection loops.
 >
-># RewriteCond %{SERVER_NAME} =api.ozone.best
+># RewriteCond %{SERVER_NAME} =api.depan-heure.com
 ># RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
 >
->SSLCertificateFile /etc/letsencrypt/live/ozone.best-0001/fullchain.pem
->SSLCertificateKeyFile /etc/letsencrypt/live/ozone.best-0001/privkey.pem
+>SSLCertificateFile /etc/letsencrypt/live/depan-heure.com-0001/fullchain.pem
+>SSLCertificateKeyFile /etc/letsencrypt/live/depan-heure.com-0001/privkey.pem
 >Include /etc/letsencrypt/options-ssl-apache.conf
 ></VirtualHost>
 >```
@@ -418,9 +428,9 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >Protocols h2 h2c http/1.1
 >```
 >
-> - Soit dans la config d'Apache d'un site en particulier (ici `ozone.best`) :
+> - Soit dans la config d'Apache d'un site en particulier (ici `depan-heure.com`) :
 >
-> `sudo nano /etc/apache2/sites-available/ozone.best-le-ssl.conf`
+> `sudo nano /etc/apache2/sites-available/depan-heure.com-le-ssl.conf`
 > 
 > On ajoute cette ligne `Protocols h2 h2c http/1.1` :
 > 
@@ -504,9 +514,9 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 
 > **On créé un alias de domaine sur l'interface de gestion du domaine :**
 > 
-> Pour `ozone.best` chez OVH l'url est :
+> Pour `depan-heure.com` chez OVH l'url est :
 > 
-> https://www.ovh.com/manager/web/#/configuration/domain/ozone.best/zone
+> https://www.ovh.com/manager/web/#/configuration/domain/depan-heure.com/zone
 > 
 > Ajouter une entrée de ce type en mode textuel : _(Remplacer `IP` par l'IPV4 de votre VPS)_
 > 
@@ -571,7 +581,7 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >```
 ><VirtualHost *:9000>
 >ServerAdmin dbl.bzh@mailfence.com
->ServerName pma.ozone.best
+>ServerName pma.depan-heure.com
 >DocumentRoot /opt/phpMyAdmin
 > 
 ><Directory /opt/phpMyAdmin>
@@ -619,7 +629,7 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 
 > **Vous devriez normalement pouvoir accéder à PMA via l'adresse de cette forme :**
 >
-> https://ozone.best:9000 _(remplacer par votre domaine à vous si ce n'est pas déjà fait)_
+> https://depan-heure.com:9000 _(remplacer par votre domaine à vous si ce n'est pas déjà fait)_
 > 
 >_Il vous dit sûrement que le certificat HTTPS n'est pas bon (un point d'exclamation sur le petit cadenas !)_
 
@@ -644,7 +654,7 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 > <IfModule mod_ssl.c>
 >        <VirtualHost *:443>
 >        ServerAdmin dbl.bzh@mailfence.com
->        ServerName pma.ozone.best
+>        ServerName pma.depan-heure.com
 >        DocumentRoot /opt/phpMyAdmin
 >
 >        <Directory /opt/phpMyAdmin>
@@ -655,14 +665,14 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 >                ErrorLog ${APACHE_LOG_DIR}/error_phpmyadmin.log
 >                CustomLog ${APACHE_LOG_DIR}/access_phpmyadmin.log combined
 >                Include /etc/letsencrypt/options-ssl-apache.conf
->                SSLCertificateFile /etc/letsencrypt/live/pma.ozone.best/fullchain.pem
->                SSLCertificateKeyFile /etc/letsencrypt/live/pma.ozone.best/privkey.pem
+>                SSLCertificateFile /etc/letsencrypt/live/pma.depan-heure.com/fullchain.pem
+>                SSLCertificateKeyFile /etc/letsencrypt/live/pma.depan-heure.com/privkey.pem
 >        </VirtualHost>
 ></IfModule>
 >
 ><VirtualHost *:9000>
 >ServerAdmin dbl.bzh@mailfence.com
->ServerName pma.ozone.best
+>ServerName pma.depan-heure.com
 >DocumentRoot /opt/phpMyAdmin
 >
 ><Directory /opt/phpMyAdmin>
@@ -708,7 +718,7 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 > - Rendez-vous à l'adresse suivante :
 > _(Adaptez l'url pour votre domaine si ce n'est pas déjà fait !)_
 > 
-> https://ozone.best:10000/webmin/edit_ssl.cgi?xnavigation=1
+> https://depan-heure.com:10000/webmin/edit_ssl.cgi?xnavigation=1
 > 
 > _Les identifiants de connexion à Webmin sont vos identifiants Linux, ceux générés lors de le création de l'utilisateur en ligne de commande SSH au tout début de cette documentation._
 > 
