@@ -737,6 +737,12 @@ _**Attention : HTTP2, ne peut fonctionner que avec du HTTPS !**_
 
 https://github.com/nodesource/distributions
 
+```bash
+cd ~
+curl -sL https://deb.nodesource.com/setup_14.x -o nodesource_setup.sh
+sudo bash nodesource_setup.sh
+```
+
 ## **Installation de LexikJWTBundle :**
 
 https://github.com/lexik/LexikJWTAuthenticationBundle
