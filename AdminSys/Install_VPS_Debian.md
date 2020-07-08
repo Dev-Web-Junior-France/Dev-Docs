@@ -5,7 +5,7 @@
 >**Voici les données `serveur/utilisateur` utilisées dans cette documentation :**
 > - Nom de l'utilisateur Linux à créer : `dbl-lnx`
 > - Adresse mail de l'admin du Serveur : `dbl-bzh@mailfence.com`
-> - Nom de domaine du serveur VPS : `ozone.best`
+> - Nom de domaine du serveur VPS : `ozone.best` (peut être remplacé par l'adresse IP du serveur si aucun domaine associé)
 > 
 >_Un petit rechercher et remplacer dans tout le document pour adapter à votre cas !_
 
@@ -13,13 +13,47 @@
 
 [Lien vers documentation complète](https://www.ssh.com/ssh/copy-id#setting-up-public-key-authentication)
 
-> **Première connexion pour créer une entrée dans le known_hosts de la machine cliente :**
+>**Première connexion en root pour créer une entrée dans le known_hosts de la machine cliente :**
 >
->`ssh root@ozone.best` _(saisir le mot de passe root SSH qui vous a été communiqué)_
+>`ssh root@ozone.best` _(saisir le mot de passe root SSH qui vous a été communiqué par mail suite à l'installation du VPS)_
+
+>**Pour des raisons de sécurité, commencer par changer le port par défaut d'utilisation de SSH :**
+>
+>`nano /etc/ssh/sshd_config`
+>
+>Décommenter et modifier la ligne :
+> 
+>`# Port 22`
+>
+>pour
+> 
+>`Port 22522` 
+> 
+> _(Vous pouvez utiliser un autre port de votre choix, attention cependant de ne pas en choisir un déjà utilisé)_
+>
+> _On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
+>
+> Relancer encuite le service SSH en tapant `systemctl restart sshd`
+>
+> Se déconnecter en tapant `exit`
+>
+> Il faut maintenant supprimer l'entrée créée dans le fichier `~/.ssh/known_hosts` lors de votre première connexion en SSH et qui est devenue obsolète suite au changement du port SSH.
+>
+> Ce sera normalement la dernière ligne du fichier.
+> 
+> Elle contiendra le nom de domaine `ozone.best` ou l'adresse IP, si vous n'avez pas de domaine
+> 
+> Exemple : `ozone.best ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbm`...
+>
+> _On sauvegarde avec CTRL+X puis O ou Y si en Anglais_
+>
+> On se reconnecte en tapant `ssh root@ozone.best -p 22522` pour ajouter une nouvelle entrée au fichier `~/.ssh/known_hosts` (on précise cette fois le port à utiliser)
+> 
+> On se déconnecte en tapant `exit`
 
 > **Ajout de la clef SSH cliente au serveur pour éviter de devoir rentrer le password à chaque connexion :**
 >
->`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best`
+>`ssh-copy-id -i ~/.ssh/id_rsa root@ozone.best -p 22522`
 
 ## **Création d'un nouvel utilisateur sudo :**
 
@@ -34,6 +68,10 @@
 > **Connexion immédiate sur ce nouvel utilisateur :**
 >
 >`su - dbl-lnx`
+
+>Si vous le souhaitez vous pouvez également copier la clef SSH, depuis la ligne de commande de votre système, comme pour le compte root afin de ne plus devoir saisir le mot de passe à chaque connexion :
+>
+>`ssh-copy-id -i ~/.ssh/id_rsa -p 22522 dbl-lnx@ozone.best`
 
 ## **Création d'un espace de swap :**
 
@@ -78,6 +116,8 @@
 > **Ajout de GNUPG pour la gestion sécurisée des repositories additionnels :**
 > 
 > `sudo apt install gnupg`
+
+> **Ajout du repo Sury aux sources logicielles :**
 >
 >`wget -q https://packages.sury.org/php/apt.gpg -O- | sudo apt-key add -`
 >
